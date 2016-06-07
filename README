@@ -1,0 +1,76 @@
+::::::::::::::::::::::::::::::::::::::::::::::::
+::											  ::
+::# CHAT - Implementação de Cliente/Servidor  ::
+::											  ::
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::::## Responsáveis ##::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::
+::Felipe Almeida ---- felipera@openmailbox.org::
+::Gabriel Lefundes ---- gabriel.5489@gmail.com::
+::::::::::::::::::::::::::::::::::::::::::::::::
+
+::::::::::::::## Implementação ##:::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::Para implementação dos dois lados do programa (cliente e servidor) foi usada a estratégia de uso da  :: 
+::função getaddrinfo() para definir os parâmetros do protocolo de comunicação, e posterior tratamento  ::
+::das conexões através das funções socket(), connect() (para o cliente), listen() e accept()           ::
+::(para o servidor). O cliente utiliza a função select() para gerenciar sua conexão com o servidor e a ::
+::entrada stdin de dados.																			   ::
+::O servidor usa a função select() e seus macros em uma thread para gerenciar as novas conexões        ::
+::que chegam, enquanto outra thread gerencia as conexões existentes e faz o tratamento da              ::
+::comunicação entre o servidor e os clientes. Cada mensagem enviada do cliente ao servidor é           ::
+::analisada para determinar qual comando está sendo dado. Sendo um comando válido, o servidor irá      ::
+::então encaminhar a mensagem correta para os clientes relevantes (encaminhar para outro(s) clientes   ::
+::no caso de SEND e SENDTO ou enviar a mensagem pedida pelo cliente original no caso de WHO e HELP).   ::
+::Em caso de comandos inválidos, uma mensagem é exibida para o usuário instruindo-o a usar o           ::
+::comando HELP. 																					   ::
+::A comunicação entre essas duas threads é feita através de um          							   ::
+::pipe presente no conjunto (set) de file descriptors dos sockets ativos no sistema.                   ::
+::Para evitar o bloqueio de portas no servidor no caso de término inesperado (ficando sujeito a esperar::
+::o tempo de time out para uso de portas do sistema), o mesmo foi implementado usando sockets          ::
+::não-bloqueantes. No uso do cliente não se faz necessário o uso de sockets não-bloqueantes, portanto  ::
+::foi deixado o padrão (bloqueante) como escolha. 													   ::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::## Uso ##::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::Após compilação do(s) programa(s) desejados(s) com auxílio do makefile incluso, a execução do programa::
+::é dada da seguinte forma:                                                                             ::
+::                                                                                                      ::
+::--SERVER        																						::
+::																										::
+::Para abrir um servidor, o usuário precisa apenas executar o arquivo com a seguinte sintaxe:           ::
+::"./server_chat <PORT>" onde PORT corresponde ao número da porta que irá receber as conexões na máquina::
+::servidor.                                                                                             ::
+::A cada novo cliente conectado, ou comando executado por um dos clientes, uma mensagem correspondente  ::
+::será impressa na tela padrão do servidor.                                                             ::
+::                                                                                                      ::
+::----CLIENT   																							::
+::																										::
+::Para começar um programa cliente, o usuário deve executar o arquivo com a seguinte sintaxe:           ::
+::"./client_chat <NOME> <SERVER ADDRESS> <SERVER PORT>" onde NOME corresponde ao nome do usuário que    ::
+::será visível ao servidor e aos outros usuários, SERVER ADRRESS corresponde ao endereço IP do servidor ::
+::ao qual se deseja conectar, e SERVER PORT corresponde ao número da porta em tal servidor que o        ::
+::programa está usando para gerenciar conexões (mesmo número de porta usado pelo usuário do servidor    ::
+::ao iniciar tal programa).                                                                             ::
+::Se a conexão for bem sucedida (mensagem de sucesso será exibida na tela do cliente), o cliente está   ::
+::pronto para interagir com o servidor e outros clientes através dos seguintes comandos:                ::
+::                                                                                                      ::
+::SEND <MSG> -- Envia mensagem (passada como argumento em MSG) para todos os outros usuários conectados ::
+::no mesmo servidor;                                                                                    ::
+::                 																						::
+::SENDTO <NOME> <MSG> -- Envia mensagem (MSG) para outro usuário específico (passado como argumento em  ::
+::NOME);																								::
+::																										::
+::WHO -- Exibe na tela do cliente todos os outros clientes conectados naquele servidor;					::
+::																										::
+::HELP -- Exibe na tela do cliente mensagem mostrando todos os possíveis comandos e suas instruções de  ::
+::uso;																									::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+
